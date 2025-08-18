@@ -1,0 +1,14 @@
+services:
+  smartbird:
+    build:
+      context: ./ai
+    image: smartbird
+    container_name: smartbird
+    volumes:
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
+    environment:
+      - DISPLAY=${DISPLAY}
+      - QT_X11_NO_MITSHM=1
+    network_mode: host
+    stdin_open: true
+    tty: true
