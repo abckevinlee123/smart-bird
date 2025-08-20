@@ -42,6 +42,7 @@ base_img = pygame.transform.scale2x(pygame.image.load(os.path.join("imgs","base.
 
 lives_img = pygame.transform.scale(pygame.image.load(os.path.join("imgs","lives.png")).convert_alpha(), (160, 56))
 neuron_img = pygame.transform.scale(pygame.image.load(os.path.join("imgs","neuron.png")).convert_alpha(), (160, 56))
+epoch_img = pygame.transform.scale(pygame.image.load(os.path.join("imgs","epoch.png")).convert_alpha(), (160, 56))
 blank_img = pygame.transform.scale(pygame.image.load(os.path.join("imgs","blank.png")).convert_alpha(), (160, 56))
 
 class Bird:
@@ -200,7 +201,7 @@ def draw_window(win, bird, pipes, base, pipe_ind):
 
     pygame.display.update()
 
-def draw_menu(bird, base, input, input2):
+def draw_menu(bird, base, input, input2, input3):
     win.blit(bg_img, (0,0))
 
     base.draw(win)
@@ -215,13 +216,18 @@ def draw_menu(bird, base, input, input2):
     win.blit(lives_img, (((WIN_WIDTH/2) - IMG_WIDTH -  20), (125)))
     win.blit(blank_img, (((WIN_WIDTH/2) + 20), (125)))
 
+    win.blit(epoch_img, (((WIN_WIDTH/2) - IMG_WIDTH -  20), (200)))
+    win.blit(blank_img, (((WIN_WIDTH/2) + 20), (200)))
+    
     text = STAT_FONT.render(input,1,(255,255,255))
     text2 = STAT_FONT.render(input2,1,(255,255,255))
+    text3 = STAT_FONT.render(input3,1,(255,255,255))
     TXT_WIDTH = text.get_width()
     TXT_HEIGHT = text.get_height()
 
     win.blit(text, (((WIN_WIDTH/2) + IMG_WIDTH/2 + 22 - (TXT_WIDTH/2)), (49 + (IMG_HEIGHT/2) - (TXT_HEIGHT/2))))
     win.blit(text2, (((WIN_WIDTH/2) + IMG_WIDTH/2 + 22 - (TXT_WIDTH/2)), (124 + (IMG_HEIGHT/2) - (TXT_HEIGHT/2))))
+    win.blit(text3, (((WIN_WIDTH/2) + IMG_WIDTH/2 + 22 - (TXT_WIDTH/2)), (199 + (IMG_HEIGHT/2) - (TXT_HEIGHT/2))))
 
     pygame.display.update()
 
@@ -230,8 +236,9 @@ def menu_screen():
     clock = pygame.time.Clock()
     text = ""
     text2 = ""
+    text3 = ""
     menu = True
-    entering_first = True  # track which field we’re on
+    entering = 1  # track which field we’re on
 
     bird = Bird(210,350)
     base = Base(FLOOR)
@@ -246,31 +253,41 @@ def menu_screen():
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_RETURN:
                     try:
-                        if entering_first:
+                        if entering == 1:
                             user_neuron_input = int(text)
-                            entering_first = False  # now move to text2
-                        else:
+                            if user_neuron_input < 400:
+                                entering = 2  # now move to text2
+                            # else:
+                                # POPUP
+                        elif entering == 2:
                             user_lives_input = int(text2)
-                            text2 = ""
+                            entering = 3 # now move to text3
+                        else:
+                            user_epoch_input = int(text3)
                             menu = False
                             run = True
                     except ValueError:
                         text = ""
                         text2 = ""
+                        text3 = ""
                 elif event.key == pygame.K_BACKSPACE:
-                    if entering_first:
+                    if entering == 1:
                         text = text[:-1]
-                    else:
+                    elif entering == 2:
                         text2 = text2[:-1]
-                elif event.unicode.isdigit():
-                    if entering_first:
-                        text += event.unicode
                     else:
+                        text3 = text3[:-1]
+                elif event.unicode.isdigit():
+                    if entering == 1:
+                        text += event.unicode
+                    elif entering == 2:
                         text2 += event.unicode
+                    else:
+                        text3 += event.unicode
 
         base.move()
-        draw_menu(bird, base, text, text2)
-    return (user_neuron_input, user_lives_input)
+        draw_menu(bird, base, text, text2, text3)
+    return (user_neuron_input, user_lives_input, user_epoch_input)
 
 
 """CODE FOR TESTING

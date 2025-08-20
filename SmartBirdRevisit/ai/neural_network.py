@@ -3,6 +3,7 @@ Tools necessary to aid in the creation and teaching of the neural network
 Author: Kevin Lee
 """
 import numpy as np
+import pickle
 
 class layer:
     """
@@ -59,8 +60,10 @@ class model:
             self.hidden_layer = layer(True, 4800, user_input, 0, 0)
             self.output_layer = layer(True, user_input, 2, 0, 0)
         else:
-            self.hidden_layer = layer(False, 4800, user_input, best_thought_process[1], best_thought_process[2])
-            self.output_layer = layer(False, user_input, 2, best_thought_process[3], best_thought_process[4])
+            # print("HW:",best_thought_process['hidden_weights'])
+            # print("OW:",best_thought_process['output_weights'])
+            self.hidden_layer = layer(False, 4800, user_input, best_thought_process['hidden_weights'], best_thought_process['hidden_biases'])
+            self.output_layer = layer(False, user_input, 2, best_thought_process['output_weights'], best_thought_process['output_biases'])
 
     # FORWARD: Given the state of the game, calculate the output of the neural network
     def forward(self, state):
@@ -76,7 +79,7 @@ class thought_process:
                     ('hidden_biases', np.float64, (1,user_input)), 
                     ('output_weights', np.float64, (user_input,2)), 
                     ('output_biases', np.float64, (1,2))]
-        thought_process = np.empty(1, dtype=form)
+        thought_process = np.empty((), dtype=form)
         thought_process['fitness_score'] = fitness_score
         thought_process['hidden_weights'] = hidden_weights
         thought_process['hidden_biases'] = hidden_biases

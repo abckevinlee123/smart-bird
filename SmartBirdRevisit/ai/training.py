@@ -29,9 +29,20 @@ def preprocessing(screen):
 
     return(final_image) 
 
-# REPLACE WEIGHTS: Replace the weights of the neural network with the new weights
-# def replace_weights(model, new_weights):
-
+# EVOLUTION: Replace some of the weights so that the model can gradually improve
+def evolution(model, neurons, chosen):
+    for y in range(2):
+        if y == 0:
+            weights = 'hidden_weights'
+        else:
+            weights = 'output_weights'
+        position = chosen+1
+        tweaked_thought_process = model[weights]
+        num_of_elements = int(tweaked_thought_process.size * 0.1 * (position*1.5))
+        random_positions = np.random.choice(tweaked_thought_process.size, num_of_elements, replace=False)
+        tweaked_thought_process.flat[random_positions] = np.random.rand(num_of_elements)
+        model[weights] = tweaked_thought_process
+    return model
 
 # class replay:
 #     """

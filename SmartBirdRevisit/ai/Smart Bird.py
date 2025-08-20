@@ -5,10 +5,13 @@ import neural_network
 import numpy as np  # For array manipulation
 # import matplotlib.pyplot as plt # For visualizing images in array format
 
+# SIMPLY PUT: we have 4800 inputs, which is the preprocessed image of the game. It will be a black and white, lower resolution (but same aspect ratio) of the game, going into the system every frame. That is then put into the neural network with however many user_input weights there are. Initially, the weights will be randomly generated. The first epoch will do horribly, but hopefully there will be gradual improvements every epoch. We keep track of the 8 best performing "thought_processes" and then continue to "evolve" the top 3. The top 3 will evolve based on their position. The no.1 will have fewer changes, as its already succeeding, and we want to avoid changing the good things. The no.2 will have more than no.1, and no.3 more than no.2.
+
 best_thought_processes = [neural_network.thought_process.format(0, 0, 0, 0, 0, 0) for _ in range(8)]
+firsttime = True
 graphs = 0
 
-def game_start(user_input, random):
+def game_start(user_input, random, chosen):
     # GAME VARIABLES
     clock = pygame.time.Clock()
     floor = game.FLOOR
@@ -21,8 +24,9 @@ def game_start(user_input, random):
     NEURAL NETWORK VARIABLES
     """
     if not random:
-        model = neural_network.model(random, best_thought_processes[0], user_input)
-    model = neural_network.model(random, 0, user_input)
+        model = neural_network.model(random, trained_thought_processes, user_input)
+    else:
+        model = neural_network.model(random, 0, user_input)
     fitness_score = 0
 
     # Training parameters
@@ -118,13 +122,21 @@ def game_start(user_input, random):
     return latest_thought_process
 
 if __name__ == '__main__':
-    user_input, user_lives = game.menu_screen()
+    user_input, user_lives, user_epoch = game.menu_screen()
     # The total number of attempts the current generation of birds have
-    for x in range(user_lives): 
-        latest_thought_process = game_start(user_input, True)
-        print("SCORE:",latest_thought_process[0][0], " for the ", x+1, " attempt")
-        # Keeping track of the best 3 thought processes
-        best_thought_processes.append(latest_thought_process)
-        best_thought_processes.sort(key=lambda x: x[0][0], reverse=True)
-        best_thought_processes = best_thought_processes[:8]
-        
+    for x in range(user_epoch):
+        if x == 1:
+            firsttime = False
+        print("Epoch ", x+1)
+        for y in range(user_lives):
+            chosen = (y % 3)
+            trained_thought_processes = training.evolution(best_thought_processes[chosen], user_input, chosen)
+            latest_thought_process = game_start(user_input, firsttime, chosen)
+            print("SCORE:",latest_thought_process['fitness_score'], " for the ", y+1, " attempt")
+            # Keeping track of the best 3 thought processes
+            best_thought_processes.append(latest_thought_process)
+            best_thought_processes.sort(key=lambda x: x['fitness_score'], reverse=True)
+            best_thought_processes = best_thought_processes[:8]
+            print("top 3:", best_thought_processes[0]['fitness_score'],",",best_thought_processes[0]['hidden_weights'].flat[-1],"-",best_thought_processes[0]['hidden_weights'].flat[0])
+
+    neural_network.thought_process.save(best_thought_processes)
