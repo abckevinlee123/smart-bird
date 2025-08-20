@@ -5,7 +5,7 @@ import neural_network
 import numpy as np  # For array manipulation
 # import matplotlib.pyplot as plt # For visualizing images in array format
 
-best_thought_processes = [neural_network.thought_process.save(0, 0, 0, 0, 0, 0) for _ in range(8)]
+best_thought_processes = [neural_network.thought_process.format(0, 0, 0, 0, 0, 0) for _ in range(8)]
 graphs = 0
 
 def game_start(user_input, random):
@@ -20,7 +20,9 @@ def game_start(user_input, random):
     """ 
     NEURAL NETWORK VARIABLES
     """
-    model = neural_network.model(random, 0, 0, user_input)
+    if not random:
+        model = neural_network.model(random, best_thought_processes[0], user_input)
+    model = neural_network.model(random, 0, user_input)
     fitness_score = 0
 
     # Training parameters
@@ -112,7 +114,7 @@ def game_start(user_input, random):
         game.draw_window(win, bird, pipes, base, pipe_ind)
 
     # 
-    latest_thought_process = neural_network.thought_process.save(fitness_score, model.hidden_layer.weights, model.hidden_layer.biases, model.output_layer.weights, model.output_layer.biases, user_input)
+    latest_thought_process = neural_network.thought_process.format(fitness_score, model.hidden_layer.weights, model.hidden_layer.biases, model.output_layer.weights, model.output_layer.biases, user_input)
     return latest_thought_process
 
 if __name__ == '__main__':
@@ -125,5 +127,4 @@ if __name__ == '__main__':
         best_thought_processes.append(latest_thought_process)
         best_thought_processes.sort(key=lambda x: x[0][0], reverse=True)
         best_thought_processes = best_thought_processes[:8]
-    for y in range(len(best_thought_processes)):
-        print("Best scores",best_thought_processes[y][0][0])
+        

@@ -53,14 +53,14 @@ class model:
     Creates the layers and generates the layer outputs
     """
     # CONSTRUCTOR: using the model details, construct the neural network model taking in 4800 pixels as inputs, the number of nodes the users wants, and then an output layer with yes or now (2 nodes)
-    def __init__(self, random, pre_weights, est_biases, user_input):
+    def __init__(self, random, best_thought_process, user_input):
         if random:
             # HIDDEN LAYER: 4800 inputs which is, user_input number of neurons, no pre_weights, no est_biases
             self.hidden_layer = layer(True, 4800, user_input, 0, 0)
             self.output_layer = layer(True, user_input, 2, 0, 0)
         else:
-            self.hidden_layer = layer(True, 4800, user_input)
-            self.output_layer = layer(True, user_input, 2, 0, 0)
+            self.hidden_layer = layer(False, 4800, user_input, best_thought_process[1], best_thought_process[2])
+            self.output_layer = layer(False, user_input, 2, best_thought_process[3], best_thought_process[4])
 
     # FORWARD: Given the state of the game, calculate the output of the neural network
     def forward(self, state):
@@ -70,18 +70,24 @@ class model:
         return output
 
 class thought_process:
-    
-
-    def save (fitness_score, hidden_weights, hidden_biases, output_weights, output_biases, user_input):
-        format = [  ('fitness_score', np.int32), 
+    def format (fitness_score, hidden_weights, hidden_biases, output_weights, output_biases, user_input):
+        form = [  ('fitness_score', np.int32), 
                     ('hidden_weights', np.float64, (4800,user_input)), 
                     ('hidden_biases', np.float64, (1,user_input)), 
                     ('output_weights', np.float64, (user_input,2)), 
                     ('output_biases', np.float64, (1,2))]
-        thought_process = np.empty(1, dtype=format)
+        thought_process = np.empty(1, dtype=form)
         thought_process['fitness_score'] = fitness_score
         thought_process['hidden_weights'] = hidden_weights
         thought_process['hidden_biases'] = hidden_biases
         thought_process['output_weights'] = output_weights
         thought_process['output_biases'] = output_biases
         return thought_process
+
+    def save (thought_processes):
+        with open("test.pkl", "wb") as f:
+            pickle.dump(thought_processes, f)
+
+    def load ():
+        with open("test.pkl", "rb") as f:
+            return pickle.load(f)

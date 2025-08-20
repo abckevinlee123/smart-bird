@@ -5,6 +5,7 @@ services:
     image: smartbird
     container_name: smartbird
     volumes:
+      - ./ai:/app-game
       - /tmp/.X11-unix:/tmp/.X11-unix:rw
     environment:
       - DISPLAY=${DISPLAY}
