@@ -92,16 +92,16 @@ class thought_process:
 
     # SAVE: Placing the array in a pickle (.pkl) format
     def save (thought_processes):
-        with open("log.pkl", "wb") as f:
+        with open("saved_tp/log.pkl", "wb") as f:
             pickle.dump(thought_processes, f)
 
     # LOAD: Loading the array of the required pickle (.pkl)
     def load ():
-        with open("log.pkl", "rb") as f:
+        with open("saved_tp/log.pkl", "rb") as f:
             return pickle.load(f)
     
     # LOAD BEST: Getting the best neural network saved
     def load_best ():
-        with open("../saved_tp/best.pkl", "rb") as f:
+        with open("saved_tp/best.pkl", "rb") as f:
             best_thought_processes = pickle.load(f)
-            return best_thought_process[0]
+            return best_thought_processes[0]
