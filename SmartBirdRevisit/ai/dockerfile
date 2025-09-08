@@ -22,4 +22,4 @@ COPY . /app-game
 RUN pip install --no-cache-dir --upgrade pip \
   && pip install --no-cache-dir pygame opencv-python numpy
 
-CMD [ "python", "Smart Bird.py" ]
+CMD [ "python", "smart_bird.py" ]

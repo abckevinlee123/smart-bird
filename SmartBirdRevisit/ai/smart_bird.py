@@ -23,7 +23,7 @@ class Simulation:
     def run_epoch(self, num_attempts):
         for attempt_index in range(num_attempts):
             selected_index = attempt_index % 3  # Cycle through top 3 for evolution
-            evolved_process = utility.evolution(
+            evolved_process = utility.evolve_thought_process(
                 self.best_thought_processes[selected_index],
                 self.num_neurons,
                 selected_index
@@ -35,7 +35,7 @@ class Simulation:
     def run_single_simulation(self, thought_process):
         clock = pygame.time.Clock()
         bird = game.Bird(210, 350)
-        base = game.Base(game.FLOOR)
+        base = game.Base(game.FLOOR_Y)
         pipes = [game.Pipe(700)]
         fitness_score = 0
         running = True
@@ -53,7 +53,7 @@ class Simulation:
             if len(pipes) > 1 and bird.x > pipes[0].x + pipes[0].PIPE_TOP.get_width():
                 active_pipe_index = 1
 
-            if bird.y + bird.img.get_height() >= game.FLOOR or bird.y < -220:
+            if bird.y + bird.img.get_height() >= game.FLOOR_Y or bird.y < -220:
                 break
 
             bird.update_position()
