@@ -26,7 +26,7 @@ class layer:
             # np.zeros((2,4)) <-- NEED BOTH PARENTHESIS, np.zeros() REQUIRES A TUPLE
             # array([[0., 0., 0., 0.],
             # [0., 0., 0., 0.]])
-            self.biases = np.zeros((1, self.neurons))
+            self.biases = np.random.randn(1, self.neurons)
         else:
             self.weights = pre_weights
             self.biases = est_biases

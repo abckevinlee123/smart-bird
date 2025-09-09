@@ -1,5 +1,6 @@
 import pygame
 import numpy as np  # For array manipulation
+import matplotlib.pyplot as plt
 
 from lib import game
 from lib import utility
@@ -18,18 +19,35 @@ class Simulation:
         ]
         self.first_run = True
         self.window = game.win
+        # --- Matplotlib Setup ---
+        plt.ion() # Turn on interactive mode (VERY IMPORTANT)
+
+        # Create the figure and two subplots side-by-side
+        self.fig, (self.ax1, self.ax2) = plt.subplots(1, 2, figsize=(10, 5))
+        self.fig.show()
 
     def run_epoch(self, num_attempts):
         for attempt_index in range(num_attempts):
             selected_index = attempt_index % 3  # Cycle through top 3 for evolution
-            evolved_process = utility.evolve_thought_process(
-                self.best_thought_processes[selected_index],
-                self.num_neurons,
-                selected_index,
-                self.best_thought_processes[selected_index]['fitness_score']
-            )
+            if self.first_run:
+                evolved_process = None
+            else:
+                evolved_process = utility.evolve_thought_process(
+                    self.best_thought_processes[selected_index],
+                    self.num_neurons,
+                    selected_index,
+                    self.best_thought_processes[selected_index]['fitness_score']
+                )
             latest_process = self.run_single_simulation(evolved_process)
             self.update_best_processes(latest_process)
+            # --- Update the Combined Plot ---
+            utility.visualize_thought_process(
+                self.fig, 
+                self.ax1, 
+                self.ax2, 
+                latest_process
+            )
+
             print(f"Attempt {attempt_index + 1}: Score {latest_process['fitness_score']}")
 
     def run_single_simulation(self, thought_process):
@@ -40,10 +58,10 @@ class Simulation:
         fitness_score = 0
         running = True
 
-        if not self.first_run:
-            model = neural_network.model(False, thought_process, self.num_neurons)
-        else:
+        if self.first_run:
             model = neural_network.model(True, 0, self.num_neurons)  # Start fresh random model
+        else:
+            model = neural_network.model(False, thought_process, self.num_neurons)
 
         while running:
             clock.tick(FPS)

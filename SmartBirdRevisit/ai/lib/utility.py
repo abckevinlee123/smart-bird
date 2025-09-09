@@ -26,32 +26,42 @@ def evolve_thought_process(thought_process, num_neurons, rank_index, score):
     Gradually mutate the top thought_process weights for gradual improvement.
     Currently works in-place, but ensure copying outside if needed for reproducibility.
     """
-    for layer in ['hidden_weights', 'output_weights']:
-        weights = thought_process[layer].copy()
-        mutation_rates = [0.01, 0.05, 0.1]
-        if score < 500:
-            mutation_rates *= 8                                                           # Increase mutation rates for scores that dont contribute to pipe passing
+    for layer in ['hidden_weights', 'output_weights', 'hidden_biases', 'output_biases']:
+        param = thought_process[layer].copy()
+        mutation_rates = [0.1, 0.15, 0.2]
+        if score < 50:
+            mutation_rates = np.array(mutation_rates) * 5                                   # Increase mutation rates arbitrarily for scores that dont come close to the pipe
+        elif score < 60:
+            mutation_rates = np.array(mutation_rates) * 2                                   # Increase mutation rates arbitrarily for scores that barely enter the pipe
         mutation_rate = mutation_rates[rank_index]
-        num_mutations = int(weights.size * mutation_rate)
+        num_mutations = int(param.size * mutation_rate)
         if num_mutations > 0:
-            mutation_indices = np.random.choice(weights.size, num_mutations, replace=False)
-            weights.flat[mutation_indices] = np.random.rand(num_mutations)
-        thought_process[layer] = weights
+            mutation_indices = np.random.choice(param.size, num_mutations, replace=False)
+            param.flat[mutation_indices] += np.random.randn(num_mutations) * 0.5            # Instead of outright replacing, add a small random value to the existing weight/bias (scaled by half a standard deviation)
+        thought_process[layer] = param
     return thought_process
 
-def visualize_thought_process(thought_process):
+def visualize_thought_process(fig, ax1, ax2, thought_process):
     """
     Visualize the weights of the neural network layers as grayscale images.
+    This version updates an existing figure instead of creating a new one.
     """
+    # --- 1. Clear the previous images ---
+    ax1.clear()
+    ax2.clear()
+
+    if 'hidden_weights' not in thought_process:
+        return
+
     hidden_weights = thought_process['hidden_weights']
     output_weights = thought_process['output_weights']
 
-    # Try to infer a reasonable 2D shape
     def best_2d_shape(size):
+        if size == 0: return (1, 1)
         for i in range(int(np.sqrt(size)), 0, -1):
             if size % i == 0:
                 return (i, size // i)
-        return (size, 1)
+        return (1, size) # Fallback for prime numbers
 
     hidden_shape = best_2d_shape(hidden_weights.size)
     output_shape = best_2d_shape(output_weights.size)
@@ -59,16 +69,16 @@ def visualize_thought_process(thought_process):
     hidden_image = hidden_weights.reshape(hidden_shape)
     output_image = output_weights.reshape(output_shape)
 
-    plt.figure(figsize=(10, 5))
+    # --- 2. Redraw the new images ---
+    ax1.set_title('Hidden Layer Weights')
+    ax1.imshow(hidden_image, cmap='gray', aspect='auto')
+    ax1.axis('off')
 
-    plt.subplot(1, 2, 1)
-    plt.title('Hidden Layer Weights')
-    plt.imshow(hidden_image, cmap='gray')
-    plt.axis('off')
+    ax2.set_title('Output Layer Weights')
+    ax2.imshow(output_image, cmap='gray', aspect='auto')
+    ax2.axis('off')
 
-    plt.subplot(1, 2, 2)
-    plt.title('Output Layer Weights')
-    plt.imshow(output_image, cmap='gray')
-    plt.axis('off')
-
-    plt.show()
+    # --- 3. Update the window without blocking ---
+    fig.tight_layout()
+    fig.canvas.draw()
+    fig.canvas.flush_events()
