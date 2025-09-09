@@ -14,8 +14,7 @@ class Simulation:
     def __init__(self, num_neurons):
         self.num_neurons = num_neurons
         self.best_thought_processes = [
-            neural_network.thought_process.format(0, 0, 0, 0, 0, 0)
-            for _ in range(POPULATION_SIZE)
+            {'fitness_score': 0} for _ in range (POPULATION_SIZE)
         ]
         self.first_run = True
         self.window = game.win
@@ -26,7 +25,8 @@ class Simulation:
             evolved_process = utility.evolve_thought_process(
                 self.best_thought_processes[selected_index],
                 self.num_neurons,
-                selected_index
+                selected_index,
+                self.best_thought_processes[selected_index]['fitness_score']
             )
             latest_process = self.run_single_simulation(evolved_process)
             self.update_best_processes(latest_process)
@@ -40,7 +40,10 @@ class Simulation:
         fitness_score = 0
         running = True
 
-        model = neural_network.model(True, 0, self.num_neurons)  # Start fresh random model
+        if not self.first_run:
+            model = neural_network.model(False, thought_process, self.num_neurons)
+        else:
+            model = neural_network.model(True, 0, self.num_neurons)  # Start fresh random model
 
         while running:
             clock.tick(FPS)

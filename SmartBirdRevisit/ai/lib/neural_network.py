@@ -77,17 +77,13 @@ class thought_process:
     """
     # FORMAT: Shaping all the necessary information of a neural network required to restart training for a later session
     def format (fitness_score, hidden_weights, hidden_biases, output_weights, output_biases, user_input):
-        form = [  ('fitness_score', np.int32), 
-                    ('hidden_weights', np.float64, (4800,user_input)), 
-                    ('hidden_biases', np.float64, (1,user_input)), 
-                    ('output_weights', np.float64, (user_input,2)), 
-                    ('output_biases', np.float64, (1,2))]
-        thought_process = np.empty((), dtype=form)
-        thought_process['fitness_score'] = fitness_score
-        thought_process['hidden_weights'] = hidden_weights
-        thought_process['hidden_biases'] = hidden_biases
-        thought_process['output_weights'] = output_weights
-        thought_process['output_biases'] = output_biases
+        thought_process = {
+            'fitness_score': fitness_score,
+            'hidden_weights': hidden_weights,
+            'hidden_biases': hidden_biases,
+            'output_weights': output_weights,
+            'output_biases': output_biases
+        }
         return thought_process
 
     # SAVE: Placing the array in a pickle (.pkl) format
