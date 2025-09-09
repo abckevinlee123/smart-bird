@@ -46,11 +46,18 @@ def visualize_thought_process(thought_process):
     hidden_weights = thought_process['hidden_weights']
     output_weights = thought_process['output_weights']
 
-    hidden_size = int(np.sqrt(hidden_weights.size))
-    output_size = int(np.sqrt(output_weights.size))
+    # Try to infer a reasonable 2D shape
+    def best_2d_shape(size):
+        for i in range(int(np.sqrt(size)), 0, -1):
+            if size % i == 0:
+                return (i, size // i)
+        return (size, 1)
 
-    hidden_image = hidden_weights.reshape((hidden_size, hidden_size))
-    output_image = output_weights.reshape((output_size, output_size))
+    hidden_shape = best_2d_shape(hidden_weights.size)
+    output_shape = best_2d_shape(output_weights.size)
+
+    hidden_image = hidden_weights.reshape(hidden_shape)
+    output_image = output_weights.reshape(output_shape)
 
     plt.figure(figsize=(10, 5))
 
