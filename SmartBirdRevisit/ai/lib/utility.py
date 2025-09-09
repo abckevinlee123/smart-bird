@@ -6,7 +6,7 @@ Author: Kevin Lee
 import numpy as np
 import cv2
 import random
-
+import matplotlib.pyplot as plt
 
 def preprocess_screen(screen):
     """
@@ -21,19 +21,47 @@ def preprocess_screen(screen):
     return resized.flatten() / 255.0                                                        # (height[80], width[60]) ---> (column[1], pixel[4800])
 
 
-def evolve_thought_process(thought_process, num_neurons, rank_index):
+def evolve_thought_process(thought_process, num_neurons, rank_index, score):
     """
     Gradually mutate the top thought_process weights for gradual improvement.
     Currently works in-place, but ensure copying outside if needed for reproducibility.
     """
     for layer in ['hidden_weights', 'output_weights']:
         weights = thought_process[layer].copy()
-        # Define mutation rate (0.01 for top1, 0.05 top2, 0.1 top3)
         mutation_rates = [0.01, 0.05, 0.1]
-        mutation_rate = mutation_rates[rank_index] if rank_index < 3 else 0.05
+        if score < 500:
+            mutation_rates *= 8                                                           # Increase mutation rates for scores that dont contribute to pipe passing
+        mutation_rate = mutation_rates[rank_index]
         num_mutations = int(weights.size * mutation_rate)
         if num_mutations > 0:
             mutation_indices = np.random.choice(weights.size, num_mutations, replace=False)
             weights.flat[mutation_indices] = np.random.rand(num_mutations)
         thought_process[layer] = weights
     return thought_process
+
+def visualize_thought_process(thought_process):
+    """
+    Visualize the weights of the neural network layers as grayscale images.
+    """
+    hidden_weights = thought_process['hidden_weights']
+    output_weights = thought_process['output_weights']
+
+    hidden_size = int(np.sqrt(hidden_weights.size))
+    output_size = int(np.sqrt(output_weights.size))
+
+    hidden_image = hidden_weights.reshape((hidden_size, hidden_size))
+    output_image = output_weights.reshape((output_size, output_size))
+
+    plt.figure(figsize=(10, 5))
+
+    plt.subplot(1, 2, 1)
+    plt.title('Hidden Layer Weights')
+    plt.imshow(hidden_image, cmap='gray')
+    plt.axis('off')
+
+    plt.subplot(1, 2, 2)
+    plt.title('Output Layer Weights')
+    plt.imshow(output_image, cmap='gray')
+    plt.axis('off')
+
+    plt.show()
